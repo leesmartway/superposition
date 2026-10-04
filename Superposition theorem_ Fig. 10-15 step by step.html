@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Superposition theorem, Fig. 10-15, step by step</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Two voices: print = what the worksheet gives you, pen = what you write on it.
+     Two pens here: blue for the 5 V source alone, green for the 15 V source alone.
+     Red is the two put back together. */
+  :root {
+    --paper: #fcfcf9;
+    --print: #17181c;
+    --muted: #5a5f68;
+    --rule: #d8d9de;
+    --pen: #1c3faa;
+    --pen2: #17713d;
+    --red: #c3271b;
+    --hl: #ffe04a;
+    --hl-op: .8;
+    --btn-text: #fcfcf9;
+    --print-font: "STIX Two Text", "Times New Roman", Times, serif;
+    --pen-font: "Kalam", "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+    --stick: 16px;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #20302b;
+      --print: #eef0e8;
+      --muted: #afbab3;
+      --rule: #40524b;
+      --pen: #a3c8ff;
+      --pen2: #9fe6b6;
+      --red: #ff9c88;
+      --hl: #f6d860;
+      --hl-op: .38;
+      --btn-text: #16221e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #20302b;
+    --print: #eef0e8;
+    --muted: #afbab3;
+    --rule: #40524b;
+    --pen: #a3c8ff;
+    --pen2: #9fe6b6;
+    --red: #ff9c88;
+    --hl: #f6d860;
+    --hl-op: .38;
+    --btn-text: #16221e;
+  }
+
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--print);
+    font-family: var(--print-font);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+  }
+  [hidden] { display: none !important; }
+
+  .sheet {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 20px 18px 58vh;
+  }
+  h1 {
+    font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0 0 14px;
+  }
+  sub { font-size: .66em; line-height: 0; }
+
+  /* ---------- circuit ---------- */
+  .fig {
+    margin: 0;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 2;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 4px 0 6px;
+  }
+  .fig svg { display: block; width: 100%; max-height: 42vh; }
+  .fig figcaption {
+    display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline;
+    font-size: .95rem; padding-top: 2px;
+  }
+  .fig figcaption b { font-weight: 600; }
+  .fig figcaption .cap:not(.on):not(.done) { display: none; }
+  .fig figcaption .c1 { color: var(--pen); }
+  .fig figcaption .c2 { color: var(--pen2); }
+  .fig figcaption .flow { color: var(--red); }
+
+  .wire { fill: none; stroke: var(--print); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .plate-s { stroke-width: 4.4; }
+  .node { fill: var(--print); }
+  .lbl { font-family: var(--print-font); font-size: 17px; fill: var(--print); }
+  .pol { font-family: var(--print-font); font-size: 19px; fill: var(--print); text-anchor: middle; }
+
+  /* each source is taken out in turn, then both come back */
+  .v1, .v2 { transition: opacity .4s linear .2s; }
+  :root:is([data-step="1"], [data-step="2"], [data-step="3"], [data-step="4"]) .v2 { opacity: 0; }
+  :root:is([data-step="5"], [data-step="6"], [data-step="7"]) .v1 { opacity: 0; }
+
+  .pen { fill: none; stroke: var(--pen); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+         stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+  .pen.on { stroke-dashoffset: 0; opacity: 1;
+            transition: stroke-dashoffset var(--d, .6s) ease var(--t, 0s), opacity .01s linear var(--t, 0s); }
+  .pen.done { stroke-dashoffset: 0; opacity: 1; }
+  .pen.g { stroke: var(--pen2); }
+  .pen.red { stroke: var(--red); }
+
+  .mark { font-family: var(--pen-font); font-size: 21px; font-weight: 700; fill: var(--pen); opacity: 0; }
+  .mark.sm { font-size: 18px; }
+  .mark.xs { font-size: 16px; }
+  .mark.mid { text-anchor: middle; }
+  .mark.end { text-anchor: end; }
+  .mark.on { opacity: 1; transition: opacity .35s linear var(--t, 0s); }
+  .mark.done { opacity: 1; }
+  .mark.g { fill: var(--pen2); }
+  .mark.red { fill: var(--red); }
+
+  .hl { fill: none; stroke: var(--hl); stroke-width: 15; stroke-linecap: round; stroke-linejoin: round;
+        stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+  .hl.on { stroke-dashoffset: 0; opacity: var(--hl-op);
+           transition: stroke-dashoffset var(--d, 3s) linear var(--t, .6s), opacity .01s linear var(--t, .6s); }
+  .hl.done { stroke-dashoffset: 0; opacity: var(--hl-op); }
+
+  .dots { opacity: 0; }
+  .dots.a circle { fill: var(--pen); }
+  .dots.b circle { fill: var(--pen2); }
+  .dots.c circle { fill: var(--red); }
+  :root[data-step="2"] .dots.a { opacity: 1; transition: opacity .5s linear 4.2s; }
+  :root:is([data-step="3"], [data-step="4"]) .dots.a { opacity: 1; transition: opacity .5s linear .3s; }
+  :root[data-step="5"] .dots.b { opacity: 1; transition: opacity .5s linear 5.4s; }
+  :root:is([data-step="6"], [data-step="7"]) .dots.b { opacity: 1; transition: opacity .5s linear .3s; }
+  :root[data-step="9"] .dots.c { opacity: 1; transition: opacity .5s linear 1.2s; }
+
+  /* ---------- the written work ---------- */
+  .work { padding-top: 14px; }
+  .ready { color: var(--muted); margin: 6px 0 0; max-width: 50ch; }
+
+  .step {
+    scroll-margin-top: var(--stick);
+    scroll-margin-bottom: 140px;
+    padding: 2px 0 14px 14px;
+    border-left: 3px solid transparent;
+    margin-left: -14px;
+  }
+  .step.current { border-left-color: var(--pen); }
+  .step h2 {
+    font-family: var(--pen-font);
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.3;
+    color: var(--pen);
+    margin: 0 0 4px;
+    display: flex; align-items: center; gap: .45em;
+  }
+  .num {
+    flex: none;
+    display: inline-grid; place-items: center;
+    width: 1.5em; height: 1.5em;
+    border: 2px solid currentColor; border-radius: 50%;
+    font-size: .82em; line-height: 1; padding-top: .12em;
+  }
+  .say { margin: 0 0 6px; max-width: 54ch; }
+  .say.small { font-size: .95rem; color: var(--muted); margin-top: 6px; }
+  .say .c1 { color: var(--pen); font-weight: 600; }
+  .say .c2 { color: var(--pen2); font-weight: 600; }
+
+  .eq {
+    font-family: var(--pen-font);
+    font-size: 1.4rem;
+    line-height: 1.45;
+    color: var(--pen);
+    margin: 0;
+  }
+  .eq.g, .eq .g { color: var(--pen2); }
+  .eq .r { color: var(--red); }
+
+  .ink { display: block; width: fit-content; max-width: 100%;
+         clip-path: inset(-12% 100% -12% 0); }
+  .ink.on { clip-path: inset(-12% 0 -12% 0); transition: clip-path var(--d, .9s) linear var(--t, 0s); }
+  .ink.done { clip-path: inset(-12% 0 -12% 0); }
+
+  .fade { opacity: 0; }
+  .fade.on { opacity: 1; transition: opacity .5s linear var(--t, 0s); }
+  .fade.done { opacity: 1; }
+
+  .answer {
+    font-family: var(--pen-font); font-weight: 700; font-size: 1.5rem; line-height: 1.4;
+    color: var(--red);
+    border: 2.5px solid var(--red);
+    border-radius: 7px 11px 8px 13px;
+    padding: 6px 14px 3px;
+    margin: 10px 0 0;
+  }
+  .answer span { display: block; }
+
+  /* ---------- controls ---------- */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: var(--paper);
+    border-top: 1px solid var(--rule);
+    padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+  .bar-in {
+    max-width: 1160px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+  }
+  .ticks { display: flex; gap: 5px; align-items: center; flex: 1 1 100%; }
+  .ticks button {
+    font: 600 .95rem/1 var(--print-font);
+    width: 2.1rem; height: 2.1rem; padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--rule);
+    background: transparent; color: var(--muted);
+    cursor: pointer;
+  }
+  .ticks button.past { border-color: var(--pen); color: var(--pen); }
+  .ticks button[aria-current="step"] { background: var(--pen); border-color: var(--pen); color: var(--btn-text); }
+  .status { display: none; font-size: .95rem; color: var(--muted); white-space: nowrap; }
+
+  .btn {
+    font: 600 1.05rem/1 var(--print-font);
+    min-height: 2.75rem; padding: 0 .8rem; flex: 1 1 auto;
+    border-radius: 5px;
+    border: 1.5px solid var(--print);
+    background: transparent; color: var(--print);
+    cursor: pointer;
+  }
+  .btn.main { background: var(--pen); border-color: var(--pen); color: var(--btn-text); min-width: 6.4rem; }
+  .btn:disabled { opacity: .35; cursor: default; }
+  .btn:focus-visible, .ticks button:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  @media (min-width: 880px) {
+    .sheet { padding: 28px 32px 120px; }
+    .cols { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 44px; align-items: start; }
+    .fig { top: calc(env(safe-area-inset-top, 0px) + 16px); border-bottom: 0; padding: 0; }
+    .fig svg { max-height: 68vh; }
+    .work { padding-top: 0; }
+    .eq { font-size: 1.55rem; }
+    .step h2 { font-size: 1.45rem; }
+    .ticks { flex: 0 1 auto; gap: 6px; }
+    .bar-in { flex-wrap: nowrap; }
+    .status { display: inline; margin-left: 8px; }
+    .btn { flex: none; padding: 0 1.05rem; }
+    .btn.back { margin-left: auto; }
+    .btn.main { min-width: 7.2rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01s !important; transition-delay: 0s !important; }
+    .dots { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>3. Using the superposition theorem, find V<sub>3</sub>.</h1>
+
+  <div class="cols">
+    <figure class="fig" id="fig">
+      <svg viewBox="20 30 520 274" role="img" aria-labelledby="figt figd">
+        <title id="figt">Fig. 10-15 circuit</title>
+        <desc id="figd">A 5 volt source V1 on the left, positive terminal up, connects through R1, 1.5 kilohms, to a centre node. A 15 volt source V2 on the right, positive terminal up, connects through R2, 1 kilohm, to the same node. R3, 1.8 kilohms, runs from the node to ground.</desc>
+
+        <!-- highlighter: the parallel pair in each one-source circuit -->
+        <path class="hl" data-s="3" data-u="3" data-t="1.7" data-d=".6" pathLength="1" d="M260 132 V228"/>
+        <path class="hl" data-s="3" data-u="3" data-t="2.3" data-d=".6" pathLength="1" d="M312 80 H408"/>
+        <path class="hl" data-s="6" data-u="6" data-t="1.7" data-d=".6" pathLength="1" d="M112 80 H208"/>
+        <path class="hl" data-s="6" data-u="6" data-t="2.3" data-d=".6" pathLength="1" d="M260 132 V228"/>
+
+        <!-- printed schematic -->
+        <g class="orig">
+          <path class="wire" d="M60 168 V80 H120 l6.67 -10 l13.33 20 l13.33 -20 l13.33 20 l13.33 -20 l13.33 20 l6.67 -10 H320 l6.67 -10 l13.33 20 l13.33 -20 l13.33 20 l13.33 -20 l13.33 20 l6.67 -10 H460 V168"/>
+          <path class="wire" d="M60 192 V280 H460 V192"/>
+          <path class="wire" d="M260 80 V140 l10 6.67 l-20 13.33 l20 13.33 l-20 13.33 l20 13.33 l-20 13.33 l10 6.67 V280"/>
+          <path class="wire" d="M260 280 V288 M247 288 H273 M252 293 H268 M257 298 H263"/>
+          <circle class="node" cx="260" cy="80" r="5.5"/>
+          <circle class="node" cx="260" cy="280" r="5.5"/>
+          <text class="lbl" x="160" y="52" text-anchor="middle"><tspan font-style="italic">R</tspan><tspan dy="4" font-size="12">1</tspan><tspan dy="-4"> = 1.5 kΩ</tspan></text>
+          <text class="lbl" x="360" y="52" text-anchor="middle"><tspan font-style="italic">R</tspan><tspan dy="4" font-size="12">2</tspan><tspan dy="-4"> = 1 kΩ</tspan></text>
+          <text class="lbl" x="287" y="178"><tspan font-style="italic">R</tspan><tspan dy="4" font-size="12">3</tspan></text>
+          <text class="lbl" x="287" y="199">1.8 kΩ</text>
+
+          <!-- V1, + on top -->
+          <g class="v1">
+            <path class="wire" d="M43 168 H77 M43 184 H77"/>
+            <path class="wire plate-s" d="M52 176 H68 M52 192 H68"/>
+            <text class="lbl" x="90" y="176"><tspan font-style="italic">V</tspan><tspan dy="4" font-size="12">1</tspan></text>
+            <text class="lbl" x="90" y="197">5 V</text>
+            <text class="pol" x="34" y="164">+</text>
+            <text class="pol" x="34" y="208">−</text>
+          </g>
+
+          <!-- V2, + on top -->
+          <g class="v2">
+            <path class="wire" d="M443 168 H477 M443 184 H477"/>
+            <path class="wire plate-s" d="M452 176 H468 M452 192 H468"/>
+            <text class="lbl" x="430" y="176" text-anchor="end"><tspan font-style="italic">V</tspan><tspan dy="4" font-size="12">2</tspan></text>
+            <text class="lbl" x="430" y="197" text-anchor="end">15 V</text>
+            <text class="pol" x="488" y="164">+</text>
+            <text class="pol" x="488" y="208">−</text>
+          </g>
+        </g>
+
+        <!-- step 1: the 15 V source becomes a short -->
+        <path class="pen" data-s="1" data-u="4" data-t=".9" data-d=".5" pathLength="1" d="M460 168 V192"/>
+        <text class="mark sm end" data-s="1" data-u="4" data-t="1.5" x="449" y="186">short</text>
+
+        <!-- step 2: directions and polarities with only the 5 V source (blue pen) -->
+        <path class="pen" data-s="2" data-u="4" data-t=".6" pathLength="1" d="M128 104 H192 M182 97 L192 104 L182 111"/>
+        <text class="mark mid" data-s="2" data-u="4" data-t="1" x="160" y="129">I<tspan dy="5" font-size="14">1</tspan></text>
+        <text class="mark mid" data-s="2" data-u="4" data-t="1.2" x="104" y="72">+</text>
+        <text class="mark mid" data-s="2" data-u="4" data-t="1.3" x="216" y="72">−</text>
+        <path class="pen" data-s="2" data-u="4" data-t="1.8" pathLength="1" d="M328 104 H392 M382 97 L392 104 L382 111"/>
+        <text class="mark mid" data-s="2" data-u="4" data-t="2.2" x="360" y="129">I<tspan dy="5" font-size="14">2</tspan></text>
+        <text class="mark mid" data-s="2" data-u="4" data-t="2.4" x="304" y="72">+</text>
+        <text class="mark mid" data-s="2" data-u="4" data-t="2.5" x="416" y="72">−</text>
+        <path class="pen" data-s="2" data-u="4" data-t="3" pathLength="1" d="M236 150 V212 M229 202 L236 212 L243 202"/>
+        <text class="mark end" data-s="2" data-u="4" data-t="3.4" x="224" y="174">I<tspan dy="5" font-size="14">3</tspan></text>
+        <text class="mark mid" data-s="2" data-u="4" data-t="3.6" x="280" y="148">+</text>
+        <text class="mark mid" data-s="2" data-u="4" data-t="3.7" x="280" y="232">−</text>
+
+        <!-- steps 3-4: values from the 5 V source -->
+        <text class="mark sm mid" data-s="3" data-u="4" data-t="8" x="160" y="151">2.333 mA</text>
+        <text class="mark sm mid" data-s="4" data-u="4" data-t="4.7" x="360" y="151">1.5 mA</text>
+        <text class="mark sm end" data-s="4" data-u="4" data-t="7.8" x="224" y="196">0.833 mA</text>
+
+        <!-- step 5: the 5 V source becomes a short; directions with only the 15 V source (green pen) -->
+        <path class="pen g" data-s="5" data-u="7" data-t=".9" data-d=".5" pathLength="1" d="M60 168 V192"/>
+        <text class="mark sm g" data-s="5" data-u="7" data-t="1.5" x="71" y="186">short</text>
+        <path class="pen g" data-s="5" data-u="7" data-t="2.4" pathLength="1" d="M392 104 H328 M338 97 L328 104 L338 111"/>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="2.8" x="360" y="129">I<tspan dy="5" font-size="14">2</tspan></text>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="3" x="416" y="72">+</text>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="3.1" x="304" y="72">−</text>
+        <path class="pen g" data-s="5" data-u="7" data-t="3.5" pathLength="1" d="M192 104 H128 M138 97 L128 104 L138 111"/>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="3.9" x="160" y="129">I<tspan dy="5" font-size="14">1</tspan></text>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="4.1" x="216" y="72">+</text>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="4.2" x="104" y="72">−</text>
+        <path class="pen g" data-s="5" data-u="7" data-t="4.6" pathLength="1" d="M236 150 V212 M229 202 L236 212 L243 202"/>
+        <text class="mark end g" data-s="5" data-u="7" data-t="5" x="224" y="174">I<tspan dy="5" font-size="14">3</tspan></text>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="5.2" x="280" y="148">+</text>
+        <text class="mark mid g" data-s="5" data-u="7" data-t="5.3" x="280" y="232">−</text>
+
+        <!-- steps 6-7: values from the 15 V source -->
+        <text class="mark sm mid g" data-s="6" data-u="7" data-t="8" x="360" y="151">8.25 mA</text>
+        <text class="mark sm mid g" data-s="7" data-u="7" data-t="4.7" x="160" y="151">4.5 mA</text>
+        <text class="mark sm end g" data-s="7" data-u="7" data-t="7.8" x="224" y="196">3.75 mA</text>
+
+        <!-- step 8: both results side by side on each resistor -->
+        <path class="pen" data-s="8" data-u="8" data-t=".5" data-d=".4" pathLength="1" d="M114 104 H146 M138 98 L146 104 L138 110"/>
+        <text class="mark xs" data-s="8" data-u="8" data-t=".8" x="153" y="109">2.333 mA</text>
+        <path class="pen" data-s="8" data-u="8" data-t=".7" data-d=".4" pathLength="1" d="M314 104 H346 M338 98 L346 104 L338 110"/>
+        <text class="mark xs" data-s="8" data-u="8" data-t="1" x="353" y="109">1.5 mA</text>
+        <path class="pen" data-s="8" data-u="8" data-t=".9" data-d=".4" pathLength="1" d="M241 150 V208 M235 200 L241 208 L247 200"/>
+        <text class="mark xs end" data-s="8" data-u="8" data-t="1.2" x="213" y="180">0.833 mA</text>
+
+        <path class="pen g" data-s="8" data-u="8" data-t="1.8" data-d=".4" pathLength="1" d="M146 127 H114 M122 121 L114 127 L122 133"/>
+        <text class="mark xs g" data-s="8" data-u="8" data-t="2.1" x="153" y="132">4.5 mA</text>
+        <path class="pen g" data-s="8" data-u="8" data-t="2" data-d=".4" pathLength="1" d="M346 127 H314 M322 121 L314 127 L322 133"/>
+        <text class="mark xs g" data-s="8" data-u="8" data-t="2.3" x="353" y="132">8.25 mA</text>
+        <path class="pen g" data-s="8" data-u="8" data-t="2.2" data-d=".4" pathLength="1" d="M225 150 V208 M219 200 L225 208 L231 200"/>
+        <text class="mark xs end g" data-s="8" data-u="8" data-t="2.5" x="213" y="201">3.75 mA</text>
+
+        <text class="mark sm mid red" data-s="8" data-u="8" data-t="4" x="160" y="153">subtract</text>
+        <text class="mark sm mid red" data-s="8" data-u="8" data-t="4.2" x="360" y="153">subtract</text>
+        <text class="mark sm mid red" data-s="8" data-u="8" data-t="10" x="232" y="234">add</text>
+
+        <!-- step 9: the real currents and the answer (red pen) -->
+        <path class="pen red" data-s="9" data-t=".4" pathLength="1" d="M236 150 V212 M229 202 L236 212 L243 202"/>
+        <text class="mark end red" data-s="9" data-t=".7" x="224" y="174">I<tspan dy="5" font-size="14">3</tspan></text>
+        <text class="mark sm end red" data-s="9" data-t="3" x="224" y="196">4.583 mA</text>
+        <path class="pen red" data-s="9" data-t=".9" pathLength="1" d="M392 104 H328 M338 97 L328 104 L338 111"/>
+        <text class="mark sm mid red" data-s="9" data-t="1.3" x="360" y="129">6.75 mA</text>
+        <path class="pen red" data-s="9" data-t="1.1" pathLength="1" d="M192 104 H128 M138 97 L128 104 L138 111"/>
+        <text class="mark sm mid red" data-s="9" data-t="1.5" x="160" y="129">2.167 mA</text>
+        <text class="mark mid red" data-s="9" data-t="5.7" x="280" y="148">+</text>
+        <text class="mark mid red" data-s="9" data-t="5.8" x="280" y="246">−</text>
+        <text class="mark sm red" data-s="9" data-t="6" x="287" y="224">8.25 V</text>
+
+        <g class="dots a" id="dotsA" aria-hidden="true"></g>
+        <g class="dots b" id="dotsB" aria-hidden="true"></g>
+        <g class="dots c" id="dotsC" aria-hidden="true"></g>
+      </svg>
+      <figcaption>
+        <b>Fig. 10-15</b>
+        <span class="cap c1 fade" data-s="2" data-u="4" data-t="4.2">Blue dots: current from the 5 V source alone.</span>
+        <span class="cap c2 fade" data-s="5" data-u="7" data-t="5.4">Green dots: current from the 15 V source alone.</span>
+        <span class="cap fade" data-s="8" data-u="8" data-t=".5">Blue from 5 V, green from 15 V.</span>
+        <span class="cap flow fade" data-s="9" data-t="1.2">Red dots: the real currents with both sources on.</span>
+      </figcaption>
+    </figure>
+
+    <div class="work" id="work">
+      <p class="ready" id="ready">Press Start to work the problem one step at a time. Back and Next move between steps, and the arrow keys do the same. The three ground symbols in the printed figure are one common wire, drawn here as the bottom rail.</p>
+
+      <section class="step" data-step="1" hidden>
+        <h2><span class="num">1</span>Remove one voltage source (15 V)</h2>
+        <p class="say fade" data-s="1">Superposition looks at one source at a time. Take the 15 V source out first and put a plain wire where it was. A voltage source turned down to zero volts is a short.</p>
+        <p class="eq ink" data-s="1" data-t="1.2" data-d="1.2">V<sub>2</sub> replaced by a short (0 Ω)</p>
+        <p class="eq ink" data-s="1" data-t="2.8" data-d="1.1">Only the 5 V source is left</p>
+      </section>
+
+      <section class="step" data-step="2" hidden>
+        <h2><span class="num">2</span>Indicate the current directions</h2>
+        <p class="say fade" data-s="2">Current leaves the + terminal of the 5 V source, goes through R<sub>1</sub>, and splits at the node. Part goes down through R<sub>3</sub>. The rest goes on through R<sub>2</sub> and the short. Mark + on the end of each resistor where the current enters.</p>
+        <p class="eq ink" data-s="2" data-t=".8" data-d="1.3">I<sub>1</sub> and I<sub>2</sub> flow to the right</p>
+        <p class="eq ink" data-s="2" data-t="3" data-d=".9">I<sub>3</sub> flows down</p>
+      </section>
+
+      <section class="step" data-step="3" hidden>
+        <h2><span class="num">2</span>Total resistance and current</h2>
+        <p class="say fade" data-s="3">R<sub>3</sub> and R<sub>2</sub> both run from the node to ground, so they are in parallel. R<sub>1</sub> is in series with that pair.</p>
+        <p class="eq ink" data-s="3" data-t=".5" data-d=".7">V<sub>T</sub> = 5 V</p>
+        <p class="eq ink" data-s="3" data-t="1.7" data-d="1.5">R<sub>EQ</sub> = 1.8 kΩ ∥ 1 kΩ = 642.857 Ω</p>
+        <p class="eq ink" data-s="3" data-t="3.6" data-d="1.4">R<sub>T</sub> = 1.5 kΩ + R<sub>EQ</sub> = 2142.857 Ω</p>
+        <p class="eq ink" data-s="3" data-t="5.5" data-d="1.2">I<sub>T</sub> = 5 V ÷ 2142.857 Ω</p>
+        <p class="eq ink" data-s="3" data-t="7.1" data-d="1.1">∴ I<sub>T</sub> = I<sub>1</sub> = 2.333 mA</p>
+      </section>
+
+      <section class="step" data-step="4" hidden>
+        <h2><span class="num">2</span>Current divider</h2>
+        <p class="say fade" data-s="4">The 2.333 mA splits between R<sub>2</sub> and R<sub>3</sub>. With only two resistors, each branch gets I<sub>T</sub> times the opposite resistor, divided by the two resistors added together.</p>
+        <p class="eq ink" data-s="4" data-t="1" data-d="1.1">1 kΩ + 1.8 kΩ = 2.8 kΩ</p>
+        <p class="eq ink" data-s="4" data-t="2.6" data-d="1.4">I<sub>2</sub> = 2.333 mA × 1.8 kΩ ÷ 2.8 kΩ</p>
+        <p class="eq ink" data-s="4" data-t="4.2" data-d=".6">= 1.5 mA</p>
+        <p class="eq ink" data-s="4" data-t="5.6" data-d="1.4">I<sub>3</sub> = 2.333 mA × 1 kΩ ÷ 2.8 kΩ</p>
+        <p class="eq ink" data-s="4" data-t="7.2" data-d=".7">= 0.833 mA</p>
+        <p class="say small fade" data-s="4" data-t="8.8">Check: 1.5 mA + 0.833 mA = 2.333 mA, the current that came in through R<sub>1</sub>.</p>
+      </section>
+
+      <section class="step" data-step="5" hidden>
+        <h2><span class="num">3</span>Remove the other voltage source (5 V)</h2>
+        <p class="say fade" data-s="5">Put the 15 V source back and short the 5 V source instead. This part is written in <span class="c2">green</span> so the two sources stay easy to tell apart. Current now leaves the + terminal of the 15 V source, goes left through R<sub>2</sub>, and splits at the node between R<sub>3</sub> and R<sub>1</sub>.</p>
+        <p class="eq g ink" data-s="5" data-t="1.2" data-d="1.2">V<sub>1</sub> replaced by a short (0 Ω)</p>
+        <p class="eq g ink" data-s="5" data-t="2.8" data-d="1.3">I<sub>2</sub> and I<sub>1</sub> flow to the left</p>
+        <p class="eq g ink" data-s="5" data-t="4.6" data-d="1">I<sub>3</sub> still flows down</p>
+      </section>
+
+      <section class="step" data-step="6" hidden>
+        <h2><span class="num">3</span>Total resistance and current</h2>
+        <p class="say fade" data-s="6">This time R<sub>1</sub> and R<sub>3</sub> are the parallel pair, and R<sub>2</sub> is in series with them.</p>
+        <p class="eq g ink" data-s="6" data-t=".5" data-d=".7">V<sub>T</sub> = 15 V</p>
+        <p class="eq g ink" data-s="6" data-t="1.7" data-d="1.5">R<sub>EQ</sub> = 1.5 kΩ ∥ 1.8 kΩ = 818.18 Ω</p>
+        <p class="eq g ink" data-s="6" data-t="3.6" data-d="1.4">R<sub>T</sub> = 1 kΩ + R<sub>EQ</sub> = 1818.18 Ω</p>
+        <p class="eq g ink" data-s="6" data-t="5.5" data-d="1.2">I<sub>T</sub> = 15 V ÷ 1818.18 Ω</p>
+        <p class="eq g ink" data-s="6" data-t="7.1" data-d="1.1">∴ I<sub>T</sub> = I<sub>2</sub> = 8.25 mA</p>
+      </section>
+
+      <section class="step" data-step="7" hidden>
+        <h2><span class="num">3</span>Current divider</h2>
+        <p class="say fade" data-s="7">The 8.25 mA splits between R<sub>1</sub> and R<sub>3</sub>. Same rule: the opposite resistor on top, the two added together on the bottom.</p>
+        <p class="eq g ink" data-s="7" data-t="1" data-d="1.1">1.5 kΩ + 1.8 kΩ = 3.3 kΩ</p>
+        <p class="eq g ink" data-s="7" data-t="2.6" data-d="1.4">I<sub>1</sub> = 8.25 mA × 1.8 kΩ ÷ 3.3 kΩ</p>
+        <p class="eq g ink" data-s="7" data-t="4.2" data-d=".6">= 4.5 mA</p>
+        <p class="eq g ink" data-s="7" data-t="5.6" data-d="1.4">I<sub>3</sub> = 8.25 mA × 1.5 kΩ ÷ 3.3 kΩ</p>
+        <p class="eq g ink" data-s="7" data-t="7.2" data-d=".7">= 3.75 mA</p>
+        <p class="say small fade" data-s="7" data-t="8.8">Check: 4.5 mA + 3.75 mA = 8.25 mA, the current that came in through R<sub>2</sub>.</p>
+      </section>
+
+      <section class="step" data-step="8" hidden>
+        <h2><span class="num">4</span>Compare the current directions</h2>
+        <p class="say fade" data-s="8">Put both results on the one circuit, <span class="c1">blue</span> from the 5 V source and <span class="c2">green</span> from the 15 V source, and check each resistor. Opposite directions subtract, and the larger current decides which way it really flows. Same directions add.</p>
+        <p class="eq ink" data-s="8" data-t="3" data-d="1.3">I<sub>1</sub>, I<sub>2</sub>: opposite, so subtract</p>
+        <p class="eq ink" data-s="8" data-t="5" data-d="1.4">I<sub>1</sub> = <span class="g">4.5</span> − 2.333 = 2.167 mA</p>
+        <p class="eq ink" data-s="8" data-t="7" data-d="1.3">I<sub>2</sub> = <span class="g">8.25</span> − 1.5 = 6.75 mA</p>
+        <p class="eq ink" data-s="8" data-t="9" data-d="1.2">I<sub>3</sub>: same direction, so add</p>
+        <p class="say small fade" data-s="8" data-t="10.6">In R<sub>1</sub> and R<sub>2</sub> the green current is larger, so both really flow to the left.</p>
+      </section>
+
+      <section class="step" data-step="9" hidden>
+        <h2><span class="num">4</span><span>Voltage across R<sub>3</sub></span></h2>
+        <p class="say fade" data-s="9">The question asks for V<sub>3</sub>, so I<sub>3</sub> is the one that matters. Both sources push current down through R<sub>3</sub>, so add the two parts and then use Ohm's law.</p>
+        <p class="eq ink" data-s="9" data-t="1" data-d="1.2">I<sub>3</sub> = 0.833 mA + <span class="g">3.75 mA</span></p>
+        <p class="eq ink" data-s="9" data-t="2.5" data-d=".7">= 4.583 mA</p>
+        <p class="eq ink" data-s="9" data-t="3.7" data-d="1.3">V<sub>3</sub> = 4.583 mA × 1.8 kΩ</p>
+        <div class="answer ink" data-s="9" data-t="5.3" data-d=".9">
+          <span>V<sub>3</sub> = 8.25 V</span>
+        </div>
+        <p class="say small fade" data-s="9" data-t="7">Check from the other side: R<sub>2</sub> drops 6.75 mA × 1 kΩ = 6.75 V, and 15 V − 6.75 V = 8.25 V at the node. Same answer.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="ticks" id="ticks" role="group" aria-label="Steps"></div>
+    <span class="status" id="status">Ready</span>
+    <button class="btn back" id="back" type="button">Back</button>
+    <button class="btn" id="replay" type="button">Replay</button>
+    <button class="btn" id="play" type="button">Play</button>
+    <button class="btn main" id="next" type="button">Start</button>
+  </div>
+</div>
+<p class="sr" id="live" aria-live="polite"></p>
+
+<script>
+(function () {
+  var TOTAL = 9;
+  var titles = ['', 'Remove the 15 volt source', 'Current directions with the 5 volt source',
+                'Total resistance and current, 5 volt source', 'Current divider, 5 volt source',
+                'Remove the 5 volt source', 'Total resistance and current, 15 volt source',
+                'Current divider, 15 volt source', 'Compare the current directions', 'Voltage across R3'];
+  // how long autoplay stays on each step (ms)
+  var hold = [0, 6500, 8500, 12000, 12500, 10000, 12000, 12500, 14500, 11500];
+
+  var root = document.documentElement;
+  var timed = [].slice.call(document.querySelectorAll('[data-s]'));
+  var sections = [].slice.call(document.querySelectorAll('.step'));
+  var fig = document.getElementById('fig');
+  var ready = document.getElementById('ready');
+  var ticksEl = document.getElementById('ticks');
+  var statusEl = document.getElementById('status');
+  var liveEl = document.getElementById('live');
+  var backBtn = document.getElementById('back');
+  var nextBtn = document.getElementById('next');
+  var playBtn = document.getElementById('play');
+  var replayBtn = document.getElementById('replay');
+  var wide = window.matchMedia('(min-width: 880px)');
+  var calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  var step = 0, playing = false, timer = null;
+
+  timed.forEach(function (el) {
+    if (el.dataset.t) el.style.setProperty('--t', el.dataset.t + 's');
+    if (el.dataset.d) el.style.setProperty('--d', el.dataset.d + 's');
+  });
+
+  var ticks = [];
+  for (var i = 1; i <= TOTAL; i++) {
+    (function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = n;
+      b.setAttribute('aria-label', 'Step ' + n + ': ' + titles[n]);
+      b.addEventListener('click', function () { stop(); go(n); });
+      ticksEl.appendChild(b);
+      ticks.push(b);
+    })(i);
+  }
+
+  function setStick() {
+    root.style.setProperty('--stick', wide.matches ? '16px' : (fig.offsetHeight + 10) + 'px');
+  }
+
+  function render(scroll) {
+    root.dataset.step = String(step);
+    var turnOn = [];
+    timed.forEach(function (el) {
+      var s = +el.dataset.s;
+      var u = el.dataset.u ? +el.dataset.u : Infinity;   // last step this mark stays on the page
+      if (step < s || step > u) { el.classList.remove('on', 'done'); }
+      else if (step === s) { el.classList.remove('on', 'done'); turnOn.push(el); }
+      else { el.classList.remove('on'); el.classList.add('done'); }
+    });
+    var current = null;
+    sections.forEach(function (sec) {
+      var s = +sec.dataset.step;
+      sec.hidden = s > step;
+      sec.classList.toggle('current', s === step);
+      if (s === step) current = sec;
+    });
+    ready.hidden = step > 0;
+
+    void document.body.offsetWidth;          // commit the "before" state
+    turnOn.forEach(function (el) { el.classList.add('on'); });
+    setStick();
+
+    backBtn.disabled = step === 0;
+    replayBtn.disabled = step === 0;
+    nextBtn.textContent = step === 0 ? 'Start' : step === TOTAL ? 'Start over' : 'Next';
+    playBtn.textContent = playing ? 'Pause' : 'Play';
+    statusEl.textContent = step === 0 ? 'Ready' : 'Step ' + step + ' of ' + TOTAL;
+    liveEl.textContent = step === 0 ? '' : 'Step ' + step + ' of ' + TOTAL + ': ' + titles[step];
+    ticks.forEach(function (b, idx) {
+      var n = idx + 1;
+      b.classList.toggle('past', n < step);
+      if (n === step) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    });
+
+    if (scroll) {
+      var smooth = calm.matches ? 'auto' : 'smooth';
+      if (current) current.scrollIntoView({ behavior: smooth, block: wide.matches ? 'nearest' : 'start' });
+      else window.scrollTo({ top: 0, behavior: smooth });
+    }
+    flow(step >= 2 && step !== 8);
+  }
+
+  function go(n) {
+    step = Math.max(0, Math.min(TOTAL, n));
+    render(true);
+  }
+
+  function advance() {
+    step += 1;
+    render(true);
+    timer = setTimeout(step < TOTAL ? advance : stop, hold[step]);
+  }
+  function play() {
+    playing = true;
+    if (step >= TOTAL) step = 0;
+    advance();
+  }
+  function stop() {
+    clearTimeout(timer);
+    timer = null;
+    if (playing) { playing = false; playBtn.textContent = 'Play'; }
+  }
+
+  nextBtn.addEventListener('click', function () { stop(); go(step === TOTAL ? 0 : step + 1); });
+  backBtn.addEventListener('click', function () { stop(); go(step - 1); });
+  replayBtn.addEventListener('click', function () { stop(); render(false); });
+  playBtn.addEventListener('click', function () { if (playing) stop(); else play(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); stop(); if (step < TOTAL) go(step + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); stop(); go(step - 1); }
+  });
+
+  /* ---- current, shown as dots ----
+     Each set is two loops that share one branch. The number of dots on a loop
+     follows the current in it, at roughly one dot per 300 px for each 1 mA, so
+     the three pictures can be compared with each other.
+       A (steps 2-4), 5 V alone:   0.833 mA through R3, 1.5 mA through R2
+       B (steps 5-7), 15 V alone:  3.75 mA through R3,  4.5 mA through R1
+       C (step 9),    both on:     4.583 mA through R3, 2.167 mA through R1 */
+  var NS = 'http://www.w3.org/2000/svg';
+  var L = 60, M = 260, R = 460, T = 80, B = 280;
+  var dots = [];
+  function addLoop(group, pts, count, offset) {
+    var segs = [], total = 0;
+    for (var k = 0; k < pts.length; k++) {
+      var a = pts[k], b = pts[(k + 1) % pts.length];
+      var len = Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]);
+      segs.push({ a: a, b: b, len: len });
+      total += len;
+    }
+    var spacing = total / count;
+    for (var n = 0; n < count; n++) {
+      var c = document.createElementNS(NS, 'circle');
+      c.setAttribute('r', '4');
+      group.appendChild(c);
+      dots.push({ el: c, segs: segs, total: total, at: n * spacing + offset });
+    }
+  }
+  var gA = document.getElementById('dotsA'), gB = document.getElementById('dotsB'), gC = document.getElementById('dotsC');
+  // out of the top of V1, to the right
+  addLoop(gA, [[L, B], [L, T], [M, T], [M, B]], 2, 0);
+  addLoop(gA, [[L, B], [L, T], [R, T], [R, B]], 6, 100);
+  // out of the top of V2, to the left
+  addLoop(gB, [[R, B], [R, T], [M, T], [M, B]], 10, 0);
+  addLoop(gB, [[R, B], [R, T], [L, T], [L, B]], 18, 33);
+  addLoop(gC, [[R, B], [R, T], [M, T], [M, B]], 12, 0);
+  addLoop(gC, [[R, B], [R, T], [L, T], [L, B]], 9, 33);
+
+  function draw(shift) {
+    for (var k = 0; k < dots.length; k++) {
+      var dot = dots[k];
+      var d = (dot.at + shift) % dot.total;
+      for (var s = 0; s < dot.segs.length; s++) {
+        var g = dot.segs[s];
+        if (d <= g.len) {
+          var f = g.len ? d / g.len : 0;
+          dot.el.setAttribute('cx', g.a[0] + (g.b[0] - g.a[0]) * f);
+          dot.el.setAttribute('cy', g.a[1] + (g.b[1] - g.a[1]) * f);
+          break;
+        }
+        d -= g.len;
+      }
+    }
+  }
+  var raf = null, t0 = 0;
+  function frame(now) {
+    if (!t0) t0 = now;
+    draw((now - t0) * 0.055);
+    raf = requestAnimationFrame(frame);
+  }
+  function flow(on) {
+    if (on && !calm.matches) { if (!raf) { t0 = 0; raf = requestAnimationFrame(frame); } }
+    else if (raf) { cancelAnimationFrame(raf); raf = null; }
+  }
+  draw(0);
+
+  window.addEventListener('resize', setStick);
+  if (wide.addEventListener) wide.addEventListener('change', setStick);
+  setStick();
+  render(false);
+})();
+</script>
+</body>
+</html>
